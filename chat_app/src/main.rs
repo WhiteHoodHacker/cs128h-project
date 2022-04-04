@@ -1,11 +1,20 @@
+#[macro_use]
+extern crate rocket;
 use chat_app::Message;
-fn main() {
-    let x = Message{
-        text: String::from("Hello"),
+use chrono;
+
+#[get("/")]
+fn test() -> String{
+    let message = Message {
         user_id: 1,
         user_name: String::from("John"),
-        date: String::from("20222-01-01"),
-        time: String::from("12:00"),
+        text: String::from("Hello, world!"),
+        timestamp: chrono::Utc::now()
     };
-    println!("{:?}", x);
+    message.as_string()
 }
+#[launch]
+fn rocket() -> _ {
+    rocket::build().mount("/", routes![test])
+}
+
