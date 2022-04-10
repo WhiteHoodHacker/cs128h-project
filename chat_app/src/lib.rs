@@ -1,13 +1,13 @@
-use chrono::DateTime;
-use chrono::Local;
-use chrono::Utc;
+use rocket::FromForm;
+use rocket::serde::*;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, FromForm, Serialize, Deserialize)]
+#[serde(crate="rocket::serde")]
 pub struct Message {
     pub user_id: i32,
     pub user_name: String,
     pub text: String,
-    pub timestamp: DateTime<Utc>,
+    pub timestamp: String,
 }
 impl Message {
     pub fn as_string(&self) -> String {
@@ -16,7 +16,7 @@ impl Message {
             self.user_id,
             self.user_name,
             self.text,
-            self.timestamp.with_timezone(&Local)
+            self.timestamp
         )
     }
 }
