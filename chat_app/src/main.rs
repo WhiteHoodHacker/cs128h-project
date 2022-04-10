@@ -4,12 +4,12 @@ use chat_app::Message;
 use chrono;
 
 #[get("/")]
-fn test() -> String{
+fn test() -> String {
     let message = Message {
         user_id: 1,
         user_name: String::from("John"),
         text: String::from("Hello, world!"),
-        timestamp: chrono::Utc::now()
+        timestamp: chrono::Utc::now(),
     };
     message.as_string()
 }
@@ -17,4 +17,3 @@ fn test() -> String{
 fn rocket() -> _ {
     rocket::build().mount("/", routes![test])
 }
-
