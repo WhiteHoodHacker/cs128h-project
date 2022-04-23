@@ -1,6 +1,8 @@
 use rocket::FromForm;
 use rocket::serde::*;
 use chrono;
+use rusqlite;
+
 #[derive(Debug, Clone, FromForm, Serialize, Deserialize)]
 #[serde(crate="rocket::serde")]
 
@@ -41,4 +43,48 @@ impl Message {
             self.timestamp.with_timezone(&chrono::Local)
         )
     }
+}
+pub fn init_db(db_file: &str) -> Result<(), rusqlite::Error> {
+    let conn = rusqlite::Connection::open(db_file)?;
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS messages (
+            id INTEGER PRIMARY KEY,
+            user_id INTEGER NOT NULL,
+            user_name TEXT NOT NULL,
+            text TEXT NOT NULL,
+            timestamp TEXT NOT NULL
+        )",
+        [],
+    )?;
+    Ok(())
+}
+pub fn insert_message(db_file: &str, message: &Message) -> Result<(), rusqlite::Error> {
+    let conn = rusqlite::Connection::open(db_file)?;
+    let mut tx = conn.prepare(
+        "INSERT INTO messages (user_id, user_name, text, timestamp)
+        VALUES (:user_id, :user_name, :text, :timestamp)"
+    )?;
+    let _temp_ = tx.execute(rusqlite::named_params!{
+        ":user_id": &message.user_id,
+        ":user_name": &message.user_name,
+        ":text": &message.text,
+        ":timestamp": String::from(&message.timestamp.to_rfc2822())
+    });
+    Ok(())
+}
+pub fn get_messages(db_file: &str) -> Result<Vec<Message>, rusqlite::Error> {
+    let conn = rusqlite::Connection::open(db_file).unwrap();
+    let mut messages = Vec::new();
+    let mut tx = conn.prepare("SELECT * FROM messages")?;
+    for row in tx.query_map([], |row| {
+        Ok(Message {
+            user_id: row.get(1)?,
+            user_name: row.get(2)?,
+            text: row.get(3)?,
+            timestamp: chrono::Utc::now()
+        })
+    })? {
+        messages.push(row?);
+    }
+    Ok(messages)
 }
