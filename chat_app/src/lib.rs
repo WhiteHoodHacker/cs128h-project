@@ -53,6 +53,15 @@ impl Message {
             self.timestamp.with_timezone(&chrono::Local)
         )
     }
+    pub fn as_html(&self) -> String {
+        format!(
+            "<p>User Id: {}</p>\n<p>User Name: {}</p>\n<p>Text: {}</p>\n<p>Date-Time: {}</p>",
+            self.user_id,
+            self.user_name,
+            self.text,
+            self.timestamp.with_timezone(&chrono::Local)
+        )
+    }
 }
 pub fn init_db(db_file: &str) -> Result<(), rusqlite::Error> {
     let conn = rusqlite::Connection::open(db_file)?;
