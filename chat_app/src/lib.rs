@@ -34,6 +34,16 @@ impl Message {
             timestamp: chrono::Utc::now(),
         }
     }
+    pub fn new_from_row(row: &rusqlite::Row) -> Message {
+        let rfc_str: String = row.get(4).unwrap();
+        let timestamp = chrono::DateTime::parse_from_rfc2822(&rfc_str).unwrap();
+        Message {
+            user_id: row.get(1).unwrap(),
+            user_name: row.get(2).unwrap(),
+            text: row.get(3).unwrap(),
+            timestamp: chrono::DateTime::<chrono::Utc>::from(timestamp),
+        }
+    }
     pub fn as_string(&self) -> String {
         format!(
             "User Id: {}\nUser Name: {}\nText: {}\nDate-Time: {}",
@@ -77,12 +87,7 @@ pub fn get_messages(db_file: &str) -> Result<Vec<Message>, rusqlite::Error> {
     let mut messages = Vec::new();
     let mut tx = conn.prepare("SELECT * FROM messages")?;
     for row in tx.query_map([], |row| {
-        Ok(Message {
-            user_id: row.get(1)?,
-            user_name: row.get(2)?,
-            text: row.get(3)?,
-            timestamp: chrono::Utc::now()
-        })
+        Ok(Message::new_from_row(row))
     })? {
         messages.push(row?);
     }
