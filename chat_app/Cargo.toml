@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 rocket = {version = "0.5.0-rc.1", features=["json"]}
+rusqlite = { version = "0.27.0", features = ["bundled"] }
 chrono = "0.4"
 [dev-dependencies]
 rand = "0.8"
