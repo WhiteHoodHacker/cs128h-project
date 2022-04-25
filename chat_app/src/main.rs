@@ -6,7 +6,6 @@ use rocket::fs::{FileServer,relative};
 use rocket::response::content::Html;
 use rocket::tokio::sync::broadcast::{channel};
 use rocket::form::Form;
-
 #[post("/", data = "<form>")]
 fn post(form: Form<UserInput>) -> Html<String> {
     let db_file = "db.sqlite";
