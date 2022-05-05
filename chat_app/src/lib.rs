@@ -1,10 +1,10 @@
-use rocket::FromForm;
-use rocket::serde::*;
 use chrono;
+use rocket::serde::*;
+use rocket::FromForm;
 use rusqlite;
 
 #[derive(Debug, Clone, FromForm, Serialize, Deserialize)]
-#[serde(crate="rocket::serde")]
+#[serde(crate = "rocket::serde")]
 
 pub struct UserInput {
     message: String,
@@ -55,7 +55,7 @@ impl Message {
     }
     pub fn as_html(&self) -> String {
         format!(
-            "<p>User Id: {}</p>\n<p>User Name: {}</p>\n<p>Text: {}</p>\n<p>Date-Time: {}</p>",
+            "<p><b>User Id: {}</b><br>User Name: {}<br>Text: {}<br>Date-Time: {}</p>",
             self.user_id,
             self.user_name,
             self.text,
@@ -81,9 +81,9 @@ pub fn insert_message(db_file: &str, message: &Message) -> Result<(), rusqlite::
     let conn = rusqlite::Connection::open(db_file)?;
     let mut tx = conn.prepare(
         "INSERT INTO messages (user_id, user_name, text, timestamp)
-        VALUES (:user_id, :user_name, :text, :timestamp)"
+        VALUES (:user_id, :user_name, :text, :timestamp)",
     )?;
-    let _temp_ = tx.execute(rusqlite::named_params!{
+    let _temp_ = tx.execute(rusqlite::named_params! {
         ":user_id": &message.user_id,
         ":user_name": &message.user_name,
         ":text": &message.text,
@@ -95,9 +95,7 @@ pub fn get_messages(db_file: &str) -> Result<Vec<Message>, rusqlite::Error> {
     let conn = rusqlite::Connection::open(db_file).unwrap();
     let mut messages = Vec::new();
     let mut tx = conn.prepare("SELECT * FROM messages")?;
-    for row in tx.query_map([], |row| {
-        Ok(Message::new_from_row(row))
-    })? {
+    for row in tx.query_map([], |row| Ok(Message::new_from_row(row)))? {
         messages.push(row?);
     }
     Ok(messages)
